@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+</head>
+<body>
+    
+    <div id="app">
+        <h2>
+            <span class="titleP">Pomodoro</span>
+        </h2>
+        <h3>{{ title }}</h3>
+            
+            <button :disabled="state==='started'" @click="start()">
+                    <i class="glyphicon glyphicon-play"></i>
+            </button>
+            <button :disabled="state!=='started'" @click="pause()">
+                    <i class="glyphicon glyphicon-pause"></i>
+            </button>
+            <button :disabled="state!=='started' && state !== 'paused'" @click="stop()">
+                    <i class="glyphicon glyphicon-stop"></i>
+            </button>
+        <div class="well">
+            <div class="pomodoro-timer">
+                <span>{{ min }}</span>:<span>{{ sec }}</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const POMODORO_STATE = {
+            WORK: 'work',
+            REST: 'rest'
+        };
+        const STATES = {
+            STARTED: 'started',
+            STOPPED: 'stopped',
+            PAUSED: 'paused'
+        }
+        const workingTime = 25;
+        const restingTime = 5;
+        new Vue ({
+            el: '#app',
+            data: {
+                state: STATES.STOPPED,
+                minute: workingTime,
+                second: 0,
+                pomodoroState:  POMODORO_STATE.WORK,
+                timestamp: 0
+
+            },
+            computed: {
+                title (){
+                    return this.pomodoroState === POMODORO_STATE.WORK ? 'Work!' : 'Rest!'
+                },
+                min (){
+                    if (this.minute < 10) {
+                        return '0' + this.minute;
+                    }
+                    return this.minute;
+                },
+                sec (){
+                    if (this.second < 10) {
+                        return '0' + this.second;
+                    }
+                    return this.second;
+                }
+            },
+            methods: {
+                start (){
+                    this.state = STATES.STARTED;
+                    this._tick();
+                    this.interval = setInterval(this._tick, 1000);
+                },
+                pause (){
+                    this.state = STATES.PAUSED;
+                    clearInterval(this.interval);
+                },
+                stop (){
+                    this.state = STATES.PAUSED;
+                    clearInterval(this.interval);
+                    this.pomodoroState = POMODORO_STATE.WORK;
+                    this.minute = workingTime;
+                    this.second = 0;
+                },
+
+                _tick (){
+                    //if second is not 0, just decrement second
+                    if (this.second !== 0) {
+                        this.second--;
+                        return;
+                    }
+                    //if second is 0 and minute is not 0,
+                    //decrement minute and set ssecond to 59
+                    if (this.minute !==0) {
+                        this.minute--;
+                        this.second = 59;
+                        return;
+                    }
+                    //if second is 0 and minute is 0,
+                    //toggle working/restting intervals
+                    this.pomodoroState = this.pomodoroState === POMODORO_STATE.WORK ? POMODORO_STATE.REST : POMODORO_STATE.WORK;
+                    if (this.pomodoroState === POMODORO_STATE.WORK) {
+                        this.minute = workingTime;
+                    } else {
+                        this.minute = restingTime;
+                    }
+                }
+            }
+        })    
+    </script>
+    <style>
+    #app{
+        margin: 55px auto;
+        background: rgb(97, 164, 180);
+        padding: 55px 200px;
+
+        border: 3px solid #000;
+        width: 581px;
+
+        
+    }
+    .pomodoro-timer {
+        margin: 0 auto;
+    }
+    .well {
+        background: rgb(76, 183, 189);
+        margin: 37px 0 0 0;
+        border: 1px solid #002;
+        padding-right: 33px;
+        width: 145px;
+    }
+    span {
+        font-size: 20px;
+        color: #000000;
+        font-weight: bolder;
+    }
+    .glyphicon {
+        color: rgb(0, 0, 0);
+        margin: 8px;
+    }
+    .titleP {
+        font-size: 33px;
+        color: rgb(255, 255, 255);
+    }
+    </style>
+</body>
+</html>
